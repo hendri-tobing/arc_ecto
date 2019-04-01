@@ -12,10 +12,7 @@ defmodule Arc.Ecto.Schema do
                         options: options] do
 
       # If given a changeset, apply the changes to obtain the underlying data
-      scope = case changeset_or_data do
-        %Ecto.Changeset{} -> Ecto.Changeset.apply_changes(changeset_or_data)
-        %{__meta__: _} -> changeset_or_data
-      end
+      scope = do_apply_changes(changeset_or_data)
 
       # Cast supports both atom and string keys, ensure we're matching on both.
       allowed_param_keys = Enum.map(allowed, fn key ->
@@ -54,6 +51,9 @@ defmodule Arc.Ecto.Schema do
     end
   end
 
+  def do_apply_changes(%Ecto.Changeset{} = changeset), do: Ecto.Changeset.apply_changes(changeset)
+  def do_apply_changes(%{__meta__: _} = data), do: data
+  
   def convert_params_to_binary(params) do
     Enum.reduce(params, nil, fn
       {key, _value}, nil when is_binary(key) ->
